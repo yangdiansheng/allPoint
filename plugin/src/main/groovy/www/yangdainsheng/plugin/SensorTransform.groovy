@@ -14,6 +14,9 @@ import com.android.utils.FileUtils
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
 
+/**
+ * transform android class -> dex用来修改.class文件
+ */
 public class SensorTransform extends Transform {
 
     private static Project project

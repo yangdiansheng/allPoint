@@ -1,4 +1,5 @@
 apply plugin: 'groovy'
+apply plugin: 'maven'
 
 
 dependencies {
@@ -8,4 +9,17 @@ dependencies {
 
 repositories{
     mavenCentral()
+}
+
+uploadArchives{
+    repositories.mavenDeployer{
+        //本地仓库路径。放到项目根目录下的repo文件夹
+        repository(url:uri('../repo'))
+        //groupId 自定义 组织名，公司名
+        pom.groupId = 'cn.sensordata'
+        //artifactId 项目名，模块名
+        pom.artifactId = 'autotrack.android'
+        //插件版本
+        pom.version = '1.0.0'
+    }
 }

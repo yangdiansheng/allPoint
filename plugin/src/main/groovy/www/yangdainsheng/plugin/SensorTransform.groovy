@@ -16,12 +16,17 @@ import org.gradle.api.Project
 
 /**
  * transform android class -> dex用来修改.class文件
+ * groovy
+ * https://blog.csdn.net/Neacy_Zz/article/details/78546237
+ * https://blog.csdn.net/innost/article/details/48228651
+ * http://www.wangyuwei.me/2017/03/05/ASM%E5%AE%9E%E6%88%98%E7%BB%9F%E8%AE%A1%E6%96%B9%E6%B3%95%E8%80%97%E6%97%B6/#more
+ * https://github.com/Neacy/NeacyPlugin
  */
 public class SensorTransform extends Transform {
 
     private static Project project
 
-    public SensorTransform(Project project){
+    public SensorTransform(Project project) {
         this.project = project
     }
 
@@ -86,25 +91,33 @@ public class SensorTransform extends Transform {
         inputs.each { TransformInput input ->
             //遍历目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
-                //获取output目录
-                def dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
-                //将input 目录复制到output 目录
-                FileUtils.copyDirectory(directoryInput.file, dest)
-            }
-
-            //遍历jar
-            input.jarInputs.each { JarInput jarInput ->
-                //重命名输出文件（同目录copyFile会冲突）
-                def jarName = jarInput.name
-                def md5Name = DigestUtils.md5(jarInput.file.getAbsolutePath())
-                if (jarName.equals('.jar')) {
-                    jarName = jarName.substring(0, jarName.length() - 4)
+                println "==== directoryInput.file = " + directoryInput.file
+                if (directoryInput.file.isDirectory()){
+                    directoryInput.file.eachFileRecurse { File file ->
+                        // ...对目录进行插入字节码
+                    }
                 }
-                File copyJarFile = jarInput.file
-                //生成输出路径
-                def dest = outputProvider.getContentLocation(jarName + md5Name,jarInput.contentTypes,jarInput.scopes,Format.JAR)
-                FileUtils.copyFile(copyJarFile,dest)
+
+            //获取output目录
+            def dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
+            //将input 目录复制到output 目录
+            FileUtils.copyDirectory(directoryInput.file, dest)
+        }
+
+        //遍历jar
+        input.jarInputs.each { JarInput jarInput ->
+            //重命名输出文件（同目录copyFile会冲突）
+            def jarName = jarInput.name
+            def md5Name = DigestUtils.md5(jarInput.file.getAbsolutePath())
+            if (jarName.equals('.jar')) {
+                jarName = jarName.substring(0, jarName.length() - 4)
             }
+            File copyJarFile = jarInput.file
+            //生成输出路径
+            def dest = outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+            FileUtils.copyFile(copyJarFile, dest)
         }
     }
+}
+
 }

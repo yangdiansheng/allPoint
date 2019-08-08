@@ -15,7 +15,7 @@ public class WrapperOnClickListener implements View.OnClickListener {
         } catch (Exception e){
             e.printStackTrace();
         }
-        SensorDataPrivate.trackViewOnClick(v);
+        SensorDataAutoTrackHelper.trackViewOnClick(v);
     }
 
     public WrapperOnClickListener(View.OnClickListener source){

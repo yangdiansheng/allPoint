@@ -46,8 +46,8 @@ public class SensorDataPrivate {
             @Override
             public void onActivityResumed(Activity activity) {
                 trackAppViewScreen(activity);
-                View view = activity.findViewById(android.R.id.content);
-                delegateViewOnClickListener(activity, view);
+//                View view = activity.findViewById(android.R.id.content);
+//                delegateViewOnClickListener(activity, view);
             }
 
             @Override

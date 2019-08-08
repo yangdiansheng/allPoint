@@ -1,16 +1,10 @@
 package www.yangdainsheng.plugin
 
-import com.android.build.api.transform.Context
-import com.android.build.api.transform.DirectoryInput
-import com.android.build.api.transform.Format
-import com.android.build.api.transform.JarInput
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.api.transform.Transform
-import com.android.build.api.transform.TransformException
-import com.android.build.api.transform.TransformInput
-import com.android.build.api.transform.TransformOutputProvider
+import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
+import jdk.internal.org.objectweb.asm.ClassReader
+import jdk.internal.org.objectweb.asm.ClassWriter
 import org.apache.commons.codec.digest.DigestUtils
 import org.gradle.api.Project
 
@@ -92,32 +86,53 @@ public class SensorTransform extends Transform {
             //遍历目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
                 println "==== directoryInput.file = " + directoryInput.file
-                if (directoryInput.file.isDirectory()){
+                if (directoryInput.file.isDirectory()) {
                     directoryInput.file.eachFileRecurse { File file ->
                         // ...对目录进行插入字节码
+                        println("==== file.name = " + file.name)
+                        def name = file.name
+
+                        if (name.endsWith(".class")
+                                && !name.endsWith("R.class")
+                                && !name.endsWith("BuildConfig.class")
+                                && !name.contains("R\$")) {
+                            println("==== 开始插入 = " + file.name)
+                            ClassReader classReader = new ClassReader(file.bytes)
+                            ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
+                            SensorAnalyticsClassVisitor classVisitor = new SensorAnalyticsClassVisitor(classWriter)
+                            classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+
+                            byte[] bytes = classWriter.toByteArray()
+                            File destFile = new File(file.parentFile.absoluteFile, name)
+
+                            println("==== 重新写入的位置->lastFilePath === " + destFile.getAbsolutePath())
+                            FileOutputStream fileOutputStream = new FileOutputStream(destFile)
+                            fileOutputStream.write(bytes)
+                            fileOutputStream.close()
+                        }
                     }
                 }
 
-            //获取output目录
-            def dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
-            //将input 目录复制到output 目录
-            FileUtils.copyDirectory(directoryInput.file, dest)
-        }
-
-        //遍历jar
-        input.jarInputs.each { JarInput jarInput ->
-            //重命名输出文件（同目录copyFile会冲突）
-            def jarName = jarInput.name
-            def md5Name = DigestUtils.md5(jarInput.file.getAbsolutePath())
-            if (jarName.equals('.jar')) {
-                jarName = jarName.substring(0, jarName.length() - 4)
+                //获取output目录
+                def dest = outputProvider.getContentLocation(directoryInput.name, directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
+                //将input 目录复制到output 目录
+                FileUtils.copyDirectory(directoryInput.file, dest)
             }
-            File copyJarFile = jarInput.file
-            //生成输出路径
-            def dest = outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-            FileUtils.copyFile(copyJarFile, dest)
+
+            //遍历jar
+            input.jarInputs.each { JarInput jarInput ->
+                //重命名输出文件（同目录copyFile会冲突）
+                def jarName = jarInput.name
+                def md5Name = DigestUtils.md5(jarInput.file.getAbsolutePath())
+                if (jarName.equals('.jar')) {
+                    jarName = jarName.substring(0, jarName.length() - 4)
+                }
+                File copyJarFile = jarInput.file
+                //生成输出路径
+                def dest = outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
+                FileUtils.copyFile(copyJarFile, dest)
+            }
         }
     }
-}
 
 }

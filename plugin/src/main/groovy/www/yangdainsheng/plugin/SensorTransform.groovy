@@ -6,8 +6,12 @@ import com.android.utils.FileUtils
 import jdk.internal.org.objectweb.asm.ClassReader
 import jdk.internal.org.objectweb.asm.ClassWriter
 import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.io.IOUtils
 import org.gradle.api.Project
 
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
+import java.util.jar.JarOutputStream
 /**
  * transform android class -> dex用来修改.class文件
  * groovy
@@ -92,19 +96,11 @@ public class SensorTransform extends Transform {
                         println("==== file.name = " + file.name)
                         def name = file.name
 
-                        if (name.endsWith(".class")
-                                && !name.endsWith("R.class")
-                                && !name.endsWith("BuildConfig.class")
-                                && !name.contains("R\$")) {
+                        if (canModifyName(name)) {
                             println("==== 开始插入 = " + file.name)
-                            ClassReader classReader = new ClassReader(file.bytes)
-                            ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
-                            SensorAnalyticsClassVisitor classVisitor = new SensorAnalyticsClassVisitor(classWriter)
-                            classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+                            byte[] bytes = modifyClass(file.bytes)
 
-                            byte[] bytes = classWriter.toByteArray()
                             File destFile = new File(file.parentFile.absoluteFile, name)
-
                             println("==== 重新写入的位置->lastFilePath === " + destFile.getAbsolutePath())
                             FileOutputStream fileOutputStream = new FileOutputStream(destFile)
                             fileOutputStream.write(bytes)
@@ -127,12 +123,83 @@ public class SensorTransform extends Transform {
                 if (jarName.equals('.jar')) {
                     jarName = jarName.substring(0, jarName.length() - 4)
                 }
-                File copyJarFile = jarInput.file
                 //生成输出路径
                 def dest = outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                FileUtils.copyFile(copyJarFile, dest)
+                def modifyJar = modifyJar(jarInput.file,context.getTemporaryDir())
+                if (modifyJar == null){
+                    modifyJar = jarInput.file
+                }
+                FileUtils.copyFile(modifyJar, dest)
             }
         }
+    }
+
+    private byte[] modifyClass(byte[] fileBytes){
+        ClassReader classReader = new ClassReader(fileBytes)
+        ClassWriter classWriter = new ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
+        SensorAnalyticsClassVisitor classVisitor = new SensorAnalyticsClassVisitor(classWriter)
+        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
+        return classWriter.toByteArray()
+    }
+
+
+    private File modifyJar(File jarFile,File tempDir){
+        //读取原jar
+        def file = new JarFile(jarFile)
+        //设置出到的jar
+        def hexName = DigestUtils.md5Hex(jarFile.absolutePath).substring(0,8)
+        //要修改的 class  存储在这里 输出jar
+        def outputJar = new File(tempDir, hexName + jarFile.name)
+        JarOutputStream jarOutputStream = new JarOutputStream(new FileOutputStream(outputJar))
+        Enumeration enumeration = file.entries()
+        while (enumeration.hasMoreElements()){
+            JarEntry jarEntry = enumeration.nextElement()
+            InputStream inputStream = file.getInputStream(jarEntry)
+            String entryName = jarEntry.name
+            println "----------------- jarEntry.name   " + entryName
+            if (entryName.endsWith(".DSA") || entryName.endsWith(".SF")){
+                //ignore
+            } else {
+                if (canModifyName(entryName)){
+                    JarEntry outPutJarEntry = new JarEntry(entryName)
+                    jarOutputStream.putNextEntry(outPutJarEntry)
+                    byte[] modifiedClassBytes = null
+                    byte[] sourClassBytes = IOUtils.toByteArray(inputStream)
+                    modifiedClassBytes = modifyClass(sourClassBytes)
+                    if (modifiedClassBytes == null){
+                        modifiedClassBytes = sourClassBytes
+                    }
+                    jarOutputStream.write(modifiedClassBytes)
+                    jarOutputStream.closeEntry()
+                }
+            }
+        }
+        jarOutputStream.close()
+        file.close()
+        return outputJar
+    }
+
+    private boolean canModifyName(def name){
+        if (name.endsWith(".class")
+                && !name.endsWith("R.class")
+                && !name.endsWith("BuildConfig.class")
+                && !name.contains("R\$")) {
+            return true
+        }
+        return false
+    }
+
+    /**
+     * 应该忽略的class
+     */
+    private boolean isIgonre(String name) {
+        return (!name.endsWith("R.class")
+                && !name.endsWith("BuildConfig.class")
+                && !name.contains("R\$")
+                && !name.contains(".gradle")
+                && !name.startsWith("android")
+                && !name.startsWith("www/yangdainsheng/lib_point")
+        )
     }
 
 }

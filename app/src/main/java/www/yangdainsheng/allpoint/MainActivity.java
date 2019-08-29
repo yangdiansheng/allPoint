@@ -7,6 +7,8 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
+import www.yangdainsheng.lib_other_page.OtherMainActivity;
+
 public class MainActivity extends AppCompatActivity {
 
     Button mButton1;
@@ -21,7 +23,7 @@ public class MainActivity extends AppCompatActivity {
         mButton2 = findViewById(R.id.bt_2);
         mButton3 = findViewById(R.id.bt_3);
         mButton1.setOnClickListener(v -> {
-            startActivity(new Intent(this,SecondActivity.class));
+            startActivity(new Intent(this, OtherMainActivity.class));
             int i = 0;
             i++;
             Log.i("yyy","你点击我了" + i);

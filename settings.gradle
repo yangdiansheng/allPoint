@@ -1,1 +1,1 @@
-include ':app', ':lib_point', ':plugin'
+include ':app', ':lib_point', ':plugin', ':lib_other_page'

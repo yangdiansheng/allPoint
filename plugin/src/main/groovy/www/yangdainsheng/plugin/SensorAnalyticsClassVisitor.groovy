@@ -43,23 +43,47 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
             @Override
             void visitInvokeDynamicInsn(String name1, String desc1, Handle bsm, Object... bsmArgs) {
                 super.visitInvokeDynamicInsn(name1, desc1, bsm, bsmArgs)
-                println " --------- dynamic  name1  -------------" + name1
-                println " --------- dynamic  desc1  -------------" + desc1
-                println " --------- dynamic  bsm  -------------" + bsm.toString()
-                println " --------- dynamic  bsmArgs  -------------" + bsmArgs
-                println " --------- dynamic  Type.getArgumentTypes(desc1)  -------------" + Type.getArgumentTypes(desc1)
-                println " --------- dynamic  Type.getArgumentsAndReturnSizes(desc1).  -------------" + Type.getArgumentsAndReturnSizes(desc1)
-                println " --------- dynamic  Type.getMethodType(desc1).  -------------" + Type.getMethodType(desc1)
-                println " --------- "
-                println " --------- "
-                println " --------- "
-                println " --------- "
-                println " --------- "
+
+                if (name1 == 'onCheckedChanged') {
+                    //                println " --------- dynamic  name1  -------------" + name1
+//                println " --------- dynamic  desc1  -------------" + desc1
+//                println " --------- dynamic  bsm  -------------" + bsm.toString()
+//                println " --------- dynamic  bsmArgs  -------------" + bsmArgs
+//                    println " --------- dynamic  Type.getArgumentTypes(desc1)  -------------" + Type.getArgumentTypes(desc1)
+//                println " --------- dynamic  Type.getArgumentsAndReturnSizes(desc1).  -------------" + Type.getArgumentsAndReturnSizes(desc1)
+//                println " --------- dynamic  Type.getMethodType(desc1).  -------------" + Type.getMethodType(desc1)
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+                }
+
 
                 if (name1 == 'onClick') {
+//
+//                    println " --------- dynamic  name1  -------------" + name1
+//                    println " --------- dynamic  desc1  -------------" + desc1
+//                    println " --------- dynamic  bsm  -------------" + bsm.toString()
+//                    println " --------- dynamic  bsmArgs  -------------" + bsmArgs
+//                    println " --------- dynamic  Type.getArgumentTypes(desc1)  -------------" + Type.getArgumentTypes(desc1)
+//                    println " --------- dynamic  Type.getArgumentsAndReturnSizes(desc1).  -------------" + Type.getArgumentsAndReturnSizes(desc1)
+//                    println " --------- dynamic  Type.getMethodType(desc1).  -------------" + Type.getMethodType(desc1)
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+//                    println " --------- "
+
+
+
+
                     try {
                         if (bsmArgs.size() > 0) {
-                            SensorAnalyticsDynamicData data = new SensorAnalyticsDynamicData(desc1, name1 + bsmArgs[0],Type.getArgumentTypes(desc1).length)
+                            SensorAnalyticsDynamicData data = new SensorAnalyticsDynamicData(
+                                    desc1,
+                                    name1 + bsmArgs[0],
+                                    Type.getArgumentTypes(desc1).length)
                             mDynamicData.put(bsmArgs.toString(), data)
                         }
                     } catch (Exception e) {
@@ -74,13 +98,10 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
 
                 def nameDesc = name + desc
 
-//                println " --------- method exit  ------------- " + name
-
-
                 if (name.contains("lambda")) {
                     //包含lambda表达式
-                    println(name)
-                    println(desc)
+//                    println(name)
+//                    println(desc)
 
 //                    println " --------- mDynamicData   ------------- " + mDynamicData.toString()
 
@@ -94,7 +115,12 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
 //                                    println " ---------  accesst -------------" + access
 
 
-                                    if ((access & Opcodes.ACC_STATIC) != 0){
+//                                    println " --------- method getArgumentTypes  ------------- " + Type.getArgumentTypes(desc)
+//                                    println " --------- method name  ------------- " + name
+//                                    println " --------- method desc  ------------- " + desc
+
+
+                                    if ((access & Opcodes.ACC_STATIC) != 0) {
                                         //方法的标识按位计算需要使用&操作
                                         //这个表示为static方法，局部变量表第一个位置为view
 //                                        println " --------- lambda  0 ------------- " + name
@@ -108,19 +134,33 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
                             }
                         }
                     }
-                    if (!(dynamicKey == '')){
+                    if (!(dynamicKey == '')) {
                         mDynamicData.remove(dynamicKey)
                     }
                     return
                 }
 
+
                 if (mInterfaces != null && mInterfaces.length > 0) {
+                    SensorAnalyticsMethod sensorAnalyticsMethod
                     if ((mInterfaces.contains('android/view/View$OnClickListener') && nameDesc == 'onClick(Landroid/view/View;)V')) {
-//                        println " --------- start insert -------------"
-                        methodVisitor.visitVarInsn(ALOAD, 1)
-                        methodVisitor.visitMethodInsn(INVOKESTATIC, SDK_API_CLASS, "trackViewOnClick", "(Landroid/view/View;)V", false)
-//                        println " --------- end insert -------------"
+                        sensorAnalyticsMethod = SensorAnalyticsMethodConfig.LAMBDA_METHODS.get(nameDesc + 'android/view/View$OnClickListener')
+                    } else if ((mInterfaces.contains('android/widget/CompoundButton$OnCheckedChangeListener') && nameDesc == 'onCheckedChanged(Landroid/widget/CompoundButton;Z)V')) {
+                        sensorAnalyticsMethod = SensorAnalyticsMethodConfig.LAMBDA_METHODS.get(nameDesc + 'android/widget/CompoundButton$OnCheckedChangeListener')
                     }
+
+                    if (sensorAnalyticsMethod != null) {
+                        try {
+                            int initParamsStart = 1
+                            for (int j = initParamsStart; j < sensorAnalyticsMethod.paramsCount + initParamsStart; j++) {
+                                methodVisitor.visitVarInsn(sensorAnalyticsMethod.opcodes.get(j - initParamsStart), j)
+                            }
+                            methodVisitor.visitMethodInsn(INVOKESTATIC, SDK_API_CLASS, sensorAnalyticsMethod.agentName, sensorAnalyticsMethod.agentDesc, false)
+                        } catch(Exception e){
+                            e.printStackTrace()
+                        }
+                    }
+
                 }
             }
         }

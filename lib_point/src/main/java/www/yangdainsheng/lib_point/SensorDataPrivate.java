@@ -12,6 +12,7 @@ import android.provider.Settings;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 
 import org.json.JSONObject;
 
@@ -85,6 +86,7 @@ public class SensorDataPrivate {
         }
     }
 
+    //普通点击事件
     public static void trackViewOnClick(View view) {
         try {
             JSONObject jsonObject = new JSONObject();
@@ -92,6 +94,24 @@ public class SensorDataPrivate {
             jsonObject.put("$element_id", SensorDataPrivate.getViewId(view));
             jsonObject.put("$element_content", SensorDataPrivate.getElementContent(view));
             Activity activity = SensorDataPrivate.getActivityFromView(view);
+            if (activity != null) {
+                jsonObject.put("$activity", activity.getClass().getCanonicalName());
+            }
+            SensorDataAPI.getInstance().track("$AppClick", jsonObject);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //checkbox切换事件
+    public static void trackViewOnCheckChange(CompoundButton buttonView, boolean isChecked) {
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("$element_type", buttonView.getClass().getCanonicalName());
+            jsonObject.put("$element_id", SensorDataPrivate.getViewId(buttonView));
+            jsonObject.put("$element_content", SensorDataPrivate.getElementContent(buttonView));
+            jsonObject.put("$element_checked", isChecked);
+            Activity activity = SensorDataPrivate.getActivityFromView(buttonView);
             if (activity != null) {
                 jsonObject.put("$activity", activity.getClass().getCanonicalName());
             }
@@ -142,7 +162,7 @@ public class SensorDataPrivate {
                     activity = (Activity) context;
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return activity;

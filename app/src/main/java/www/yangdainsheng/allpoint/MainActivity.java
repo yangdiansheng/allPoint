@@ -6,6 +6,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 
 import www.yangdainsheng.lib_other_page.OtherMainActivity;
 
@@ -14,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
     Button mButton1;
     Button mButton2;
     Button mButton3;
+    CheckBox mCheckBox1;
+    CheckBox mCheckBox2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
         mButton1 = findViewById(R.id.bt_1);
         mButton2 = findViewById(R.id.bt_2);
         mButton3 = findViewById(R.id.bt_3);
+        mCheckBox1 = findViewById(R.id.cb);
+        mCheckBox2 = findViewById(R.id.cb_lambda);
         mButton1.setOnClickListener(v -> {
             startActivity(new Intent(this, OtherMainActivity.class));
             Log.i("yyy", "点击mButton1");
@@ -47,6 +53,13 @@ public class MainActivity extends AppCompatActivity {
         setonClick(100,10,mButton1);
         setonClick(100,10,mButton1,2);
 
+        mCheckBox1.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                Log.i("yyy", "点击mCheckBox1  " + isChecked);
+            }
+        });
+        mCheckBox2.setOnCheckedChangeListener((buttonView, isChecked) -> Log.i("yyy", "点击mCheckBox2  " + isChecked));
     }
 
     private void setonClick(int position,float n,View view) {

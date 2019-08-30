@@ -66,6 +66,24 @@
                 android:textColor="#ffffff"
                 android:gravity="center"/>
 
+            <CheckBox
+                android:id="@+id/cb"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:includeFontPadding="false"
+                android:text="我是一个Checkbox"
+                android:padding="10dp" />
+
+            <CheckBox
+                android:id="@+id/cb_lambda"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:includeFontPadding="false"
+                android:text="我是二个Checkbox"
+                android:padding="10dp" />
+
         </LinearLayout>
     </android.support.v4.widget.NestedScrollView>
 

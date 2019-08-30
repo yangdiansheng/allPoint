@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mButton3.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, RecycleViewActivity.class));
             Log.i("yyy", "点击mButton3");
         });
         findViewById(R.id.tv_1).setOnClickListener(new View.OnClickListener() {

@@ -40,7 +40,7 @@
                 android:id="@+id/bt_3"
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:text="我是三个按钮!"
+                android:text="我是三个按钮!打开recycle页面"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintLeft_toLeftOf="parent"
                 app:layout_constraintRight_toRightOf="parent"

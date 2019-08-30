@@ -24,20 +24,54 @@ public class MainActivity extends AppCompatActivity {
         mButton3 = findViewById(R.id.bt_3);
         mButton1.setOnClickListener(v -> {
             startActivity(new Intent(this, OtherMainActivity.class));
-            int i = 0;
-            i++;
-            Log.i("yyy","你点击我了" + i);
+            Log.i("yyy", "点击mButton1");
         });
         mButton2.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
-                Log.i("yyy","你点击我了222");
+                startActivity(new Intent(MainActivity.this, ListActivity.class));
+                Log.i("yyy", "点击mButton2");
             }
         });
         mButton3.setOnClickListener(v -> {
-            Log.i("yyy","你点击我了3333");
+            Log.i("yyy", "点击mButton3");
         });
+        findViewById(R.id.tv_1).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.i("yyy", "点击TextView1");
+            }
+        });
+        setonClick(100,10,mButton1);
+        setonClick(100,10,mButton1,2);
 
+    }
 
+    private void setonClick(int position,float n,View view) {
+        findViewById(R.id.tv_2).setOnClickListener(v -> {
+            Log.i("yyy", "position " + position);
+            Log.i("yyy", "点击TextView2");
+            int i = 1;
+            i ++;
+            Log.i("yyy", "float " + n);
+            view.setTag("1");
+        });
+    }
+
+    private void setonClick(int position,float n,View view,double b) {
+        findViewById(R.id.tv_2).setOnClickListener(v -> {
+            Log.i("yyy", "position " + position);
+            Log.i("yyy", "点击TextView2");
+            int i = 1;
+            i ++;
+            Log.i("yyy", "float " + n);
+            view.setTag("1");
+            pro();
+        });
+    }
+
+    private void pro(){
+        Log.i("yyy", "pro ");
     }
 }

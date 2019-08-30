@@ -13,11 +13,26 @@ public class OtherMainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_other_main);
         Button button = findViewById(R.id.bt_1);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button button2 = findViewById(R.id.bt_2);
+        Button button3 = findViewById(R.id.bt_3);
+        button.setOnClickListener(v -> {
+                    print("点击mButton1");
+                    Log.i("yyy","--------------------");
+                }
+        );
+
+        button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.i("yyy","111");
+                Log.i("yyy", "点击mButton2");
             }
         });
+        button3.setOnClickListener(v -> {
+            Log.i("yyy", "点击mButton3");
+        });
+    }
+
+    private void print(String s) {
+        Log.i("yyy", s);
     }
 }

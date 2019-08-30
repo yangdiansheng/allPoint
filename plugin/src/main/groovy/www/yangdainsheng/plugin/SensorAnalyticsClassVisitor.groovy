@@ -4,6 +4,8 @@ import jdk.internal.org.objectweb.asm.ClassVisitor
 import jdk.internal.org.objectweb.asm.Handle
 import jdk.internal.org.objectweb.asm.MethodVisitor
 import jdk.internal.org.objectweb.asm.Opcodes
+import org.objectweb.asm.Type
+
 /**
  * 可以拿到类的信息，对满足条件的
  */
@@ -22,7 +24,7 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
     @Override
     void visit(int i, int i1, String s, String s1, String s2, String[] strings) {
         super.visit(i, i1, s, s1, s2, strings)
-        println " --------- strings " + strings.toString() + "-------------"
+//        println " --------- strings " + strings.toString() + "-------------"
         mInterfaces = strings
     }
 
@@ -35,7 +37,7 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
             @Override
             void visitEnd() {
                 super.visitEnd()
-                println " --------- visitEnd    -------------"
+//                println " --------- visitEnd    -------------"
             }
 
             @Override
@@ -43,12 +45,21 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
                 super.visitInvokeDynamicInsn(name1, desc1, bsm, bsmArgs)
                 println " --------- dynamic  name1  -------------" + name1
                 println " --------- dynamic  desc1  -------------" + desc1
+                println " --------- dynamic  bsm  -------------" + bsm.toString()
                 println " --------- dynamic  bsmArgs  -------------" + bsmArgs
+                println " --------- dynamic  Type.getArgumentTypes(desc1)  -------------" + Type.getArgumentTypes(desc1)
+                println " --------- dynamic  Type.getArgumentsAndReturnSizes(desc1).  -------------" + Type.getArgumentsAndReturnSizes(desc1)
+                println " --------- dynamic  Type.getMethodType(desc1).  -------------" + Type.getMethodType(desc1)
+                println " --------- "
+                println " --------- "
+                println " --------- "
+                println " --------- "
+                println " --------- "
 
                 if (name1 == 'onClick') {
                     try {
                         if (bsmArgs.size() > 0) {
-                            SensorAnalyticsDynamicData data = new SensorAnalyticsDynamicData(desc1, name1 + bsmArgs[0])
+                            SensorAnalyticsDynamicData data = new SensorAnalyticsDynamicData(desc1, name1 + bsmArgs[0],Type.getArgumentTypes(desc1).length)
                             mDynamicData.put(bsmArgs.toString(), data)
                         }
                     } catch (Exception e) {
@@ -63,7 +74,7 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
 
                 def nameDesc = name + desc
 
-                println " --------- method exit  ------------- " + name
+//                println " --------- method exit  ------------- " + name
 
 
                 if (name.contains("lambda")) {
@@ -71,7 +82,7 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
                     println(name)
                     println(desc)
 
-                    println " --------- mDynamicData   ------------- " + mDynamicData.toString()
+//                    println " --------- mDynamicData   ------------- " + mDynamicData.toString()
 
                     String dynamicKey = ''
                     for (Map.Entry<String, SensorAnalyticsDynamicData> entry : mDynamicData) {
@@ -79,18 +90,18 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
                             if (entry.key.contains(name + desc)) {
                                 dynamicKey = entry.key
                                 if (entry.value.desc1.contains('Landroid/view/View$OnClickListener') && entry.value.nameDesc2 == 'onClick(Landroid/view/View;)V') {
-                                    println " ---------  visitInvokeDynamicInsn start insert -------------"
-                                    println " ---------  accesst -------------" + access
+//                                    println " ---------  visitInvokeDynamicInsn start insert -------------"
+//                                    println " ---------  accesst -------------" + access
 
 
                                     if ((access & Opcodes.ACC_STATIC) != 0){
                                         //方法的标识按位计算需要使用&操作
                                         //这个表示为static方法，局部变量表第一个位置为view
-                                        println " --------- lambda  0 ------------- " + name
-                                        methodVisitor.visitVarInsn(ALOAD, 0)
+//                                        println " --------- lambda  0 ------------- " + name
+                                        methodVisitor.visitVarInsn(ALOAD, entry.value.localTablePosition)
                                     } else {
-                                        methodVisitor.visitVarInsn(ALOAD, 1)
-                                        println " --------- lambda   1  ------------- " + name
+                                        methodVisitor.visitVarInsn(ALOAD, entry.value.localTablePosition)
+//                                        println " --------- lambda   1  ------------- " + name
                                     }
                                     methodVisitor.visitMethodInsn(INVOKESTATIC, SDK_API_CLASS, "trackViewOnClick", "(Landroid/view/View;)V", false)
                                 }
@@ -105,10 +116,10 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
 
                 if (mInterfaces != null && mInterfaces.length > 0) {
                     if ((mInterfaces.contains('android/view/View$OnClickListener') && nameDesc == 'onClick(Landroid/view/View;)V')) {
-                        println " --------- start insert -------------"
+//                        println " --------- start insert -------------"
                         methodVisitor.visitVarInsn(ALOAD, 1)
                         methodVisitor.visitMethodInsn(INVOKESTATIC, SDK_API_CLASS, "trackViewOnClick", "(Landroid/view/View;)V", false)
-                        println " --------- end insert -------------"
+//                        println " --------- end insert -------------"
                     }
                 }
             }
@@ -120,9 +131,9 @@ class SensorAnalyticsClassVisitor extends ClassVisitor implements Opcodes {
     void visitEnd() {
         super.visitEnd()
         mDynamicData.clear()
-        println " --------- class visit end  -------------"
-        println " -- "
-        println " -- "
-        println " -- "
+//        println " --------- class visit end  -------------"
+//        println " -- "
+//        println " -- "
+//        println " -- "
     }
 }

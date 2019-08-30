@@ -93,15 +93,15 @@ public class SensorTransform extends Transform {
                 if (directoryInput.file.isDirectory()) {
                     directoryInput.file.eachFileRecurse { File file ->
                         // ...对目录进行插入字节码
-                        println("==== file.name = " + file.name)
+//                        println("==== file.name = " + file.name)
                         def name = file.name
 
                         if (canModifyName(name)) {
-                            println("==== 开始插入 = " + file.name)
+//                            println("==== 开始插入 = " + file.name)
                             byte[] bytes = modifyClass(file.bytes)
 
                             File destFile = new File(file.parentFile.absoluteFile, name)
-                            println("==== 重新写入的位置->lastFilePath === " + destFile.getAbsolutePath())
+//                            println("==== 重新写入的位置->lastFilePath === " + destFile.getAbsolutePath())
                             FileOutputStream fileOutputStream = new FileOutputStream(destFile)
                             fileOutputStream.write(bytes)
                             fileOutputStream.close()
@@ -156,7 +156,7 @@ public class SensorTransform extends Transform {
             JarEntry jarEntry = enumeration.nextElement()
             InputStream inputStream = file.getInputStream(jarEntry)
             String entryName = jarEntry.name
-            println "----------------- jarEntry.name   " + entryName
+//            println "----------------- jarEntry.name   " + entryName
             if (entryName.endsWith(".DSA") || entryName.endsWith(".SF")){
                 //ignore
             } else {

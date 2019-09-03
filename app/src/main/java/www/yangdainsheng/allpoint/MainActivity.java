@@ -44,12 +44,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(MainActivity.this, RecycleViewActivity.class));
             Log.i("yyy", "点击mButton3");
         });
-        findViewById(R.id.tv_1).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.i("yyy", "点击TextView1");
-            }
-        });
+        findViewById(R.id.tv_1).setOnClickListener(v -> Log.i("yyy", "点击TextView1"));
         setonClick(100,10,mButton1);
         setonClick(100,10,mButton1,2);
 
@@ -62,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
         mCheckBox2.setOnCheckedChangeListener((buttonView, isChecked) -> Log.i("yyy", "点击mCheckBox2  " + isChecked));
     }
 
-    private void setonClick(int position,float n,View view) {
+    private void setonClick(int position, float n, View view) {
         findViewById(R.id.tv_2).setOnClickListener(v -> {
             Log.i("yyy", "position " + position);
             Log.i("yyy", "点击TextView2");
@@ -71,8 +66,9 @@ public class MainActivity extends AppCompatActivity {
             Log.i("yyy", "float " + n);
             view.setTag("1");
         });
+        mCheckBox2.setOnCheckedChangeListener((buttonView, isChecked) -> Log.i("yyy", "点击mCheckBox2  " + isChecked));
     }
-
+//
     private void setonClick(int position,float n,View view,double b) {
         findViewById(R.id.tv_2).setOnClickListener(v -> {
             Log.i("yyy", "position " + position);
@@ -83,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
             view.setTag("1");
             pro();
         });
+        mCheckBox2.setOnCheckedChangeListener((buttonView, isChecked) -> Log.i("yyy", "点击mCheckBox2  " + isChecked));
     }
 
     private void pro(){

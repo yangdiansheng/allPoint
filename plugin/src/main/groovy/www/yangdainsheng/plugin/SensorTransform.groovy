@@ -89,7 +89,7 @@ public class SensorTransform extends Transform {
         inputs.each { TransformInput input ->
             //遍历目录
             input.directoryInputs.each { DirectoryInput directoryInput ->
-                println "==== directoryInput.file = " + directoryInput.file
+//                println "==== directoryInput.file = " + directoryInput.file
                 if (directoryInput.file.isDirectory()) {
                     directoryInput.file.eachFileRecurse { File file ->
                         // ...对目录进行插入字节码
